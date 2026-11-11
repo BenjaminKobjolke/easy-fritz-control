@@ -60,3 +60,15 @@ def test_select_boxes_by_name(tmp_path: Path) -> None:
     assert len(config.select_boxes(None)) == 2
     with pytest.raises(ConfigError, match="unknown"):
         config.select_boxes("nope")
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"), [(None, False), (True, True), ("box.pem", "box.pem")]
+)
+def test_verify_tls_defaults_to_false_and_accepts_bool_or_cert_path(
+    tmp_path: Path, value: object, expected: object
+) -> None:
+    box = BOX if value is None else {**BOX, "verify_tls": value}
+    config = load_config(_write(tmp_path, {"boxes": [box]}))
+
+    assert config.boxes[0].verify_tls == expected

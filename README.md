@@ -23,14 +23,25 @@ Edit `boxes.json`:
 | Key              | Meaning                                                            |
 |------------------|--------------------------------------------------------------------|
 | `boxes[].name`   | Unique name, used for output and `--box`                           |
-| `boxes[].url`    | Web UI address, e.g. `http://fritz.box` or `http://192.168.178.1`  |
+| `boxes[].url`    | Web UI address, e.g. `http://fritz.box` or `https://192.168.178.1` |
 | `boxes[].username` | FRITZ!Box user; leave empty for password-only boxes              |
 | `boxes[].password` | Password of that user                                           |
+| `boxes[].verify_tls` | Optional, default `false` (the box's https certificate is self-signed, so it is not checked). `true` or the path to the box's exported certificate (`.pem`) to check it |
 | `blacklist_file` | Optional, default `blacklist.txt` (relative to `boxes.json`)       |
 | `log_level`      | Optional, `DEBUG`/`INFO`/`WARNING`/`ERROR`, default `INFO`         |
 
 `boxes.json` contains passwords and is gitignored. Use a different config file with
 `--config PATH` or the env var `EASY_FRITZ_CONFIG`.
+
+### HTTPS
+
+`https://` URLs work out of the box. A FRITZ!Box uses a self-signed certificate, so with the
+default `"verify_tls": false` the certificate is not checked. Anyone on the LAN could then
+pose as the box and capture the login exchange (PBKDF2 challenge-response, open to offline
+password guessing). To check the certificate, export it from the box's web UI
+(Internet > Freigaben > FRITZ!Box-Dienste, "Zertifikat herunterladen") and set
+`"verify_tls": "box.pem"`. This only works if the certificate lists the host used in `url`
+(e.g. `fritz.box`); otherwise the hostname check fails.
 
 ## blacklist.txt
 

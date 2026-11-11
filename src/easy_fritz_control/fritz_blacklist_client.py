@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from typing import Any
 
 import requests
+import urllib3
 
 from easy_fritz_control.blacklist import Blacklist
 from easy_fritz_control.constants import (
@@ -62,7 +63,11 @@ class FritzBlacklistClient:
 @contextmanager
 def open_client(box: FritzBoxConfig) -> Iterator[FritzBlacklistClient]:
     """Log in, hand out a client, always log out again (boxes limit concurrent sessions)."""
+    if box.verify_tls is False:
+        # Opted in per box in boxes.json; the per-request warning would only add noise.
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     with requests.Session() as http:
+        http.verify = box.verify_tls
         session = FritzSession(http, box.url)
         session.login(box.username, box.password.get_secret_value())
         try:

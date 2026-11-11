@@ -30,6 +30,8 @@ class FritzBoxConfig(BaseModel):
     url: str
     username: str = ""
     password: SecretStr
+    # requests' `verify`: False (default, box certs are self-signed), True or a cert path.
+    verify_tls: bool | str = False
 
     @field_validator("url")
     @classmethod

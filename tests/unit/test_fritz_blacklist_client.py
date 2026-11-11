@@ -6,9 +6,11 @@ from unittest.mock import MagicMock
 import pytest
 import requests
 
+from easy_fritz_control import fritz_blacklist_client
 from easy_fritz_control.blacklist import Blacklist
-from easy_fritz_control.fritz_blacklist_client import FritzBlacklistClient
+from easy_fritz_control.fritz_blacklist_client import FritzBlacklistClient, open_client
 from easy_fritz_control.fritz_session import FritzError, FritzSession
+from easy_fritz_control.settings import FritzBoxConfig
 
 
 def _response(payload: object) -> MagicMock:
@@ -84,3 +86,19 @@ def test_write_without_apply_ok_raises_fritz_error() -> None:
 
     with pytest.raises(FritzError, match="rejected"):
         FritzBlacklistClient(session).write(Blacklist.from_lines(["a.com"]))
+
+
+def test_open_client_applies_verify_tls_to_http_session(monkeypatch: pytest.MonkeyPatch) -> None:
+    seen: list[object] = []
+
+    def fake_session(http: requests.Session, base_url: str) -> MagicMock:
+        seen.append(http.verify)
+        return MagicMock(spec=FritzSession)
+
+    monkeypatch.setattr(fritz_blacklist_client, "FritzSession", fake_session)
+    box = FritzBoxConfig(name="b", url="https://192.168.178.1", password="p", verify_tls=False)
+
+    with open_client(box):
+        pass
+
+    assert seen == [False]
