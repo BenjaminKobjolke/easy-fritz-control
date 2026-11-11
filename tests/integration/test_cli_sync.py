@@ -35,7 +35,9 @@ def test_sync_makes_both_boxes_match_blacklist_file(tmp_path: Path) -> None:
     assert first.logged_out and second.logged_out
 
 
-def test_diff_writes_nothing(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_diff_writes_nothing_to_box_but_cleans_file(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     box = FakeFritzBox("pw", ["old.example"])
     with box.serve() as url:
         config = _setup(tmp_path, [url], ["pw"])
@@ -43,6 +45,8 @@ def test_diff_writes_nothing(tmp_path: Path, capsys: pytest.CaptureFixture[str])
         assert main(["--config", str(config), "diff"]) == EXIT_OK
 
     assert box.entries == ["old.example"]
+    cleaned = (tmp_path / "blacklist.txt").read_text(encoding="utf-8")
+    assert cleaned.splitlines() == ["# kids", "heise.de", "web.de"]
     output = capsys.readouterr().out
     assert "+ web.de" in output and "- old.example" in output
 

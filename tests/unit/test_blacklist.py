@@ -59,6 +59,34 @@ def test_from_file_reads_utf8_file(tmp_path: Path) -> None:
     assert Blacklist.from_file(path).sorted_entries() == ["one.com", "two.com"]
 
 
+def test_from_file_rewrites_cleaned_entries_keeping_comments(tmp_path: Path) -> None:
+    path = tmp_path / "blacklist.txt"
+    path.write_text("# c\n\nhttp://bing.com\nbing.com\nwww.x.de/\n", encoding="utf-8")
+
+    blacklist = Blacklist.from_file(path)
+
+    assert blacklist.sorted_entries() == ["bing.com", "x.de"]
+    assert path.read_text(encoding="utf-8").splitlines() == ["# c", "", "bing.com", "x.de"]
+
+
+def test_from_file_leaves_clean_file_untouched(tmp_path: Path) -> None:
+    path = tmp_path / "blacklist.txt"
+    path.write_bytes(b"one.com\ntwo.com")
+
+    Blacklist.from_file(path)
+
+    assert path.read_bytes() == b"one.com\ntwo.com"
+
+
+def test_from_file_invalid_entry_does_not_rewrite(tmp_path: Path) -> None:
+    path = tmp_path / "blacklist.txt"
+    path.write_bytes(b"http://bing.com\nbad entry\n")
+
+    with pytest.raises(BlacklistError, match="line 2"):
+        Blacklist.from_file(path)
+    assert path.read_bytes() == b"http://bing.com\nbad entry\n"
+
+
 def test_from_file_missing_file_raises_blacklist_error(tmp_path: Path) -> None:
     with pytest.raises(BlacklistError, match="not found"):
         Blacklist.from_file(tmp_path / "missing.txt")

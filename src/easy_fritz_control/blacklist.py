@@ -7,7 +7,10 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
+from easy_fritz_control.app_logger import AppLogger
 from easy_fritz_control.constants import COMMENT_PREFIX, MAX_BLACKLIST_ENTRIES
+
+_log = AppLogger("blacklist")
 
 # The box stores entries as typed (domain or full URL); only reject what would break the
 # CRLF-joined list it is sent as.
@@ -44,10 +47,17 @@ class Blacklist:
 
         Scheme, a leading `www.` and trailing `/` are stripped: `http://bing.com` -> `bing.com`.
         """
+        return cls._parse(lines)[0]
+
+    @classmethod
+    def _parse(cls, lines: Iterable[str]) -> tuple[Blacklist, list[str]]:
+        """Return the blacklist plus the file lines with entries cleaned and duplicates dropped."""
         entries: set[str] = set()
+        cleaned: list[str] = []
         for number, raw in enumerate(lines, start=1):
             entry = raw.strip()
             if not entry or entry.startswith(COMMENT_PREFIX):
+                cleaned.append(raw)
                 continue
             if _INVALID_CHARS_RE.search(entry):
                 raise BlacklistError(
@@ -56,20 +66,28 @@ class Blacklist:
             domain = _PREFIX_RE.sub("", entry).rstrip("/")
             if not domain:
                 raise BlacklistError(f"line {number}: '{entry}' has no domain")
-            entries.add(domain)
+            if domain not in entries:
+                cleaned.append(domain)
+                entries.add(domain)
         if len(entries) > MAX_BLACKLIST_ENTRIES:
             raise BlacklistError(
                 f"{len(entries)} entries, the FRITZ!Box accepts at most {MAX_BLACKLIST_ENTRIES}"
             )
-        return cls(frozenset(entries))
+        return cls(frozenset(entries)), cleaned
 
     @classmethod
     def from_file(cls, path: Path) -> Blacklist:
+        """Load blacklist.txt and rewrite it in place with cleaned, deduplicated entries."""
         try:
             text = path.read_text(encoding="utf-8")
         except FileNotFoundError as error:
             raise BlacklistError(f"blacklist file not found: {path}") from error
-        return cls.from_lines(text.splitlines())
+        lines = text.splitlines()
+        blacklist, cleaned = cls._parse(lines)
+        if cleaned != lines:
+            path.write_text("\n".join(cleaned) + "\n", encoding="utf-8")
+            _log.info(f"cleaned {path}")
+        return blacklist
 
     @classmethod
     def from_box_entries(cls, entries: Iterable[str]) -> Blacklist:

@@ -48,7 +48,9 @@ password guessing). To check the certificate, export it from the box's web UI
 One domain per line (`web.de`). `http://`, `https://`, a leading `www.` and a trailing `/`
 are stripped before `diff`/`sync`, so `https://www.heise.de/` becomes `heise.de` — the
 FRITZ!Box blocks all of these through the bare domain. Each domain ending needs its own line
-(`bing.com`, `bing.de`); `bing` alone is no wildcard. Blank lines and lines starting with `#`
+(`bing.com`, `bing.de`); `bing` alone is no wildcard. `show`, `diff` and `sync` rewrite
+`blacklist.txt` in place with the cleaned entries and drop duplicates; comments and blank
+lines stay. A file with an invalid entry is not rewritten. Blank lines and lines starting with `#`
 are ignored. Entries must not contain spaces. The FRITZ!Box accepts at most 500 entries.
 
 ## Usage
