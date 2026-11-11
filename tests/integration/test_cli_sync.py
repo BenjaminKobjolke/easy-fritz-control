@@ -30,8 +30,8 @@ def test_sync_makes_both_boxes_match_blacklist_file(tmp_path: Path) -> None:
 
         assert main(["--config", str(config), "sync"]) == EXIT_OK
 
-    assert sorted(first.entries) == ["https://www.heise.de/", "web.de"]
-    assert sorted(second.entries) == ["https://www.heise.de/", "web.de"]
+    assert sorted(first.entries) == ["heise.de", "web.de"]
+    assert sorted(second.entries) == ["heise.de", "web.de"]
     assert first.logged_out and second.logged_out
 
 
@@ -56,7 +56,7 @@ def test_wrong_password_on_one_box_still_syncs_the_other(tmp_path: Path) -> None
         assert main(["--config", str(config), "sync"]) == EXIT_BOX_FAILED
 
     assert broken.entries == []
-    assert sorted(good.entries) == ["https://www.heise.de/", "web.de"]
+    assert sorted(good.entries) == ["heise.de", "web.de"]
 
 
 def test_missing_config_returns_bad_input(tmp_path: Path) -> None:

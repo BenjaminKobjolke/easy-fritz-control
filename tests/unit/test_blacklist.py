@@ -13,7 +13,30 @@ def test_from_lines_strips_dedupes_and_skips_comments() -> None:
         ["  https://www.heise.de/ ", "", "# a comment", "ads.example.net", "ads.example.net"]
     )
 
-    assert blacklist.sorted_entries() == ["ads.example.net", "https://www.heise.de/"]
+    assert blacklist.sorted_entries() == ["ads.example.net", "heise.de"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("http://bing.com", "bing.com"),
+        ("https://bing.com/", "bing.com"),
+        ("HTTPS://WWW.bing.com", "bing.com"),
+        ("www.bing.com", "bing.com"),
+        ("https://x.com/a/", "x.com/a"),
+    ],
+)
+def test_from_lines_strips_scheme_www_and_trailing_slash(raw: str, expected: str) -> None:
+    assert Blacklist.from_lines([raw]).sorted_entries() == [expected]
+
+
+def test_from_lines_dedupes_after_normalizing() -> None:
+    assert Blacklist.from_lines(["bing.com", "http://bing.com"]).sorted_entries() == ["bing.com"]
+
+
+def test_from_lines_rejects_entry_without_domain() -> None:
+    with pytest.raises(BlacklistError, match="line 1"):
+        Blacklist.from_lines(["https://"])
 
 
 @pytest.mark.parametrize("bad_entry", ["exa mple.com", "bad\tentry.com", "bad\x00.com"])

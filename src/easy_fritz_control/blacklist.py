@@ -12,6 +12,8 @@ from easy_fritz_control.constants import COMMENT_PREFIX, MAX_BLACKLIST_ENTRIES
 # The box stores entries as typed (domain or full URL); only reject what would break the
 # CRLF-joined list it is sent as.
 _INVALID_CHARS_RE = re.compile(r"[\s\x00-\x1f\x7f]")
+# AVM matches by domain: `bing.com` already covers http, https and `www.`.
+_PREFIX_RE = re.compile(r"^(?:[a-z][a-z0-9+.-]*://)?(?:www\.)?", re.IGNORECASE)
 
 
 class BlacklistError(Exception):
@@ -38,7 +40,10 @@ class Blacklist:
 
     @classmethod
     def from_lines(cls, lines: Iterable[str]) -> Blacklist:
-        """Parse user-maintained lines; blank lines and `#` comments are ignored."""
+        """Parse user-maintained lines; blank lines and `#` comments are ignored.
+
+        Scheme, a leading `www.` and trailing `/` are stripped: `http://bing.com` -> `bing.com`.
+        """
         entries: set[str] = set()
         for number, raw in enumerate(lines, start=1):
             entry = raw.strip()
@@ -48,7 +53,10 @@ class Blacklist:
                 raise BlacklistError(
                     f"line {number}: '{entry}' contains whitespace or control characters"
                 )
-            entries.add(entry)
+            domain = _PREFIX_RE.sub("", entry).rstrip("/")
+            if not domain:
+                raise BlacklistError(f"line {number}: '{entry}' has no domain")
+            entries.add(domain)
         if len(entries) > MAX_BLACKLIST_ENTRIES:
             raise BlacklistError(
                 f"{len(entries)} entries, the FRITZ!Box accepts at most {MAX_BLACKLIST_ENTRIES}"

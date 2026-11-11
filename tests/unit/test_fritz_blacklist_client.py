@@ -74,7 +74,7 @@ def test_write_sends_crlf_joined_sorted_list_and_apply() -> None:
     FritzBlacklistClient(session).write(Blacklist.from_lines(["https://web.de/", "a.com"]))
 
     form = session.post_data.call_args.args[0]
-    assert form["urllist"] == "a.com\r\nhttps://web.de/"
+    assert form["urllist"] == "a.com\r\nweb.de"
     assert form["listtype"] == "black"
     assert form["apply"] == "true"
     assert form["page"] == "kids_blacklist"
