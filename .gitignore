@@ -8,6 +8,9 @@ coding-rules.json
 graphify-out/
 src/graphify-out/
 .claude/
+PLAN.md
+HANDOFF.md
 PLAN_*.md
+/tickets/
 blacklist.txt
 claude-plans/
