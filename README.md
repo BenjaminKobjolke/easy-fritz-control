@@ -15,6 +15,7 @@ directory is the single source of truth; `sync` overwrites every box's blacklist
 ```bat
 install.bat
 copy boxes.example.json boxes.json
+copy blacklist.example.txt blacklist.txt
 ```
 
 Edit `boxes.json`:

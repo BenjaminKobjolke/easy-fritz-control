@@ -1,0 +1,5 @@
+# One domain per line. Blank lines and lines starting with # are ignored.
+# This file is the single source of truth: `start.bat sync` makes every
+# FRITZ!Box's website blacklist exactly match it (max 500 entries).
+example.com
+www.example.org
