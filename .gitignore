@@ -1,0 +1,13 @@
+boxes.json
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+coding-rules.json
+graphify-out/
+src/graphify-out/
+.claude/
+PLAN_*.md
+blacklist.txt
+claude-plans/

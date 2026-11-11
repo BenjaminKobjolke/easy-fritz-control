@@ -1,0 +1,18 @@
+{
+  "blacklist_file": "blacklist.txt",
+  "log_level": "INFO",
+  "boxes": [
+    {
+      "name": "main",
+      "url": "http://192.168.178.1",
+      "username": "admin",
+      "password": "change-me"
+    },
+    {
+      "name": "second",
+      "url": "http://192.168.178.2",
+      "username": "admin",
+      "password": "change-me"
+    }
+  ]
+}
