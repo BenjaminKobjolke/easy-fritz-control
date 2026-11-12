@@ -33,3 +33,27 @@ they are intentionally referenced, not imported.
 ## graphify
 
 This project's graphify code directory is src/.
+
+## Code Analysis
+
+Copy `tools/analyze_code_config.example.bat` to `tools/analyze_code_config.bat`
+and set `CLI_ANALYZER_PATH` to your local CLI Code Analyzer checkout. Run `uv sync`
+to install the project's locked Ruff version. The analyzer needs its own
+`venv\Scripts\python.exe` installed in that checkout.
+
+Run `tools\analyze_changed_and_new_files.bat` after a feature or bug fix. It uses
+`--only-changed` to check new and modified files against Git HEAD, including
+untracked files. Tickets Watcher can set `CLI_ANALYZER_CHANGED_SINCE` to include
+committed changes since a specified commit. Run `tools\analyze_code.bat` for an
+explicit whole-project audit or when no source files differ from HEAD.
+
+Both commands return non-zero for any findings (including warnings and errors) or analyzer failures and
+write per-rule CSV reports to `code_analysis_results/`. A missing CSV means that
+rule found nothing; there is no Markdown report. Fix reported findings before
+committing. `tools\fix_ruff_issues_dry_run.bat` previews Ruff fixes;
+`tools\fix_ruff_issues.bat` applies them.
+
+PMD duplicate detection is disabled because PMD is not configured on this
+machine. Configure `pmd_path` in the analyzer's `settings.ini` and enable
+`pmd_duplicates` in `code_analysis_rules.json` to use it. Structural similarity
+detection stays disabled by default.
