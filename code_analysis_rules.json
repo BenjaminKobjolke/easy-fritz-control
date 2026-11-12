@@ -1,0 +1,25 @@
+{
+  "log_level": "all",
+  "fail_on": "warning",
+  "max_lines_per_file": {
+    "enabled": true,
+    "warning": 300,
+    "error": 500
+  },
+  "pmd_duplicates": {
+    "enabled": false,
+    "minimum_tokens": 100
+  },
+  "pmd_similar_code": {
+    "enabled": false,
+    "minimum_tokens": 100,
+    "ignore_identifiers": true,
+    "ignore_literals": true
+  },
+  "ruff_analyze": {
+    "enabled": true,
+    "select": ["E", "F", "W", "I", "UP", "B", "SIM"],
+    "ignore": [],
+    "exclude_patterns": ["venv/**", ".venv/**", "__pycache__/**", ".git/**"]
+  }
+}
