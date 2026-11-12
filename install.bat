@@ -21,8 +21,9 @@ if %ERRORLEVEL% neq 0 (
 
 echo.
 echo [2/2] Running tests...
-uv run pytest tests/ -q
-if %ERRORLEVEL% neq 0 (
+uv run pytest tests/ -v
+set "TESTRESULT=%ERRORLEVEL%"
+if %TESTRESULT% neq 0 (
     echo WARNING: Some tests failed
 )
 
@@ -31,3 +32,4 @@ echo ========================================
 echo  Setup complete!
 echo ========================================
 echo.
+exit /b %TESTRESULT%

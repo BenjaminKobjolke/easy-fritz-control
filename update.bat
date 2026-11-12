@@ -1,4 +1,6 @@
 @echo off
+setlocal
+set "RESULT=0"
 echo ========================================
 echo  Python Project - Update Libraries
 echo ========================================
@@ -30,19 +32,25 @@ if %ERRORLEVEL% neq 0 (
 echo.
 echo [3/4] Running linting checks...
 uv run ruff check src/ tests/
-if %ERRORLEVEL% neq 0 (
+set "CHECKRESULT=%ERRORLEVEL%"
+if %CHECKRESULT% neq 0 (
+    set "RESULT=%CHECKRESULT%"
     echo WARNING: Linting issues found
 )
 
 uv run mypy src/
-if %ERRORLEVEL% neq 0 (
+set "CHECKRESULT=%ERRORLEVEL%"
+if %CHECKRESULT% neq 0 (
+    if "%RESULT%"=="0" set "RESULT=%CHECKRESULT%"
     echo WARNING: Type checking issues found
 )
 
 echo.
 echo [4/4] Running tests...
-uv run pytest tests/ -q
-if %ERRORLEVEL% neq 0 (
+uv run pytest tests/ -v
+set "CHECKRESULT=%ERRORLEVEL%"
+if %CHECKRESULT% neq 0 (
+    if "%RESULT%"=="0" set "RESULT=%CHECKRESULT%"
     echo WARNING: Some tests failed after update
     echo You may need to fix compatibility issues
 )
@@ -55,3 +63,4 @@ echo.
 echo Updated packages are now in uv.lock
 echo Remember to commit uv.lock if everything works correctly
 echo.
+endlocal & exit /b %RESULT%
