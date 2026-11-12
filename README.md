@@ -82,4 +82,5 @@ tools\run_integration_tests.bat  :: CLI against fake FRITZ!Boxes over real HTTP
 update.bat                       :: upgrade dependencies, lint, type-check, test
 ```
 
-Dependencies: `requests`, `pydantic`; dev: `pytest`, `ruff`, `mypy`, `types-requests`.
+Dependencies: `requests`, `pydantic`; dev: `pytest`, `pytest-timeout`, `ruff`, `mypy`,
+`types-requests`. Each test has a 120-second timeout, including in Tickets Watcher runs.
